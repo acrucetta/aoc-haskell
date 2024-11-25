@@ -17,3 +17,5 @@ test-show-details: direct
 
 -- WARNING: Run `cabal update` if your local package index is older than this date.
 index-state: 2023-11-29T07:03:22Z
+
+tests: True

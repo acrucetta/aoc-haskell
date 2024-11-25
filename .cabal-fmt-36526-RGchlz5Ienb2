@@ -78,9 +78,8 @@ executable aoc2023
 
 test-suite test
     type:             exitcode-stdio-1.0
-    main-is:          Main.hs
+    main-is:          Day01Spec.hs
     hs-source-dirs:   test
-    default-language: Haskell2010
     build-depends:    base,
                      hspec,
                      aoc2023
