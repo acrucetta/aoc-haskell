@@ -8,14 +8,14 @@ main = hspec $ do
   describe "Day01" $ do
     it "solves part 1" $ do
       input <- readFile "test/data/day01.txt"
-      solve1 input `shouldBe` 24000
+      Day01.solve1 input `shouldBe` 24000
     it "solves part 2" $ do
       input <- readFile "test/data/day01.txt"
-      solve2 input `shouldBe` 45000
+      Day01.solve2 input `shouldBe` 45000
   describe "Day02" $ do
     it "solves part 1" $ do
       input <- readFile "test/data/day02.txt"
-      solve1 input `shouldBe` 24000
+      Day02.solve1 input `shouldBe` 15 
     it "solves part 2" $ do
       input <- readFile "test/data/day02.txt"
-      solve2 input `shouldBe` 45000
+      Day02.solve2 input `shouldBe` 45000
