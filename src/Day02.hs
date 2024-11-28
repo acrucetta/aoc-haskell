@@ -3,8 +3,9 @@
 module Day02 where
 
 import Paths_aoc2023 (getDataFileName)
-import Control.Monad.RWS.Class (MonadState(get))
 import Debug.Trace (trace)
+import Prelude hiding (round)
+import Data.Vector.Generic.Mutable (move)
 
 data Move = Rock | Paper | Scissors | Undefined
   deriving (Show, Eq, Enum)
@@ -31,18 +32,19 @@ letterToMove char = case char of
   'Z' -> Scissors
   _ -> Undefined
 
-winner :: Move -> Move -> Int
-winner move1 move2 = case compare move1 move2 of
+calcRound :: Move -> Move -> Int
+calcRound ours theirs = case compare ours theirs of
   GT -> 6
-  LT -> 3
-  EQ -> 0
+  LT -> 0
+  EQ -> 3
 
 getRoundOutcome :: String -> Int
 getRoundOutcome round =
   let theirMove = letterToMove $ head round
       ourMove = letterToMove $ last round
-      result = winner theirMove ourMove + fromEnum ourMove
-  in trace ("result is:" ++ show result) result
+      moveScore = fromEnum ourMove + 1
+      result = calcRound ourMove theirMove + moveScore
+  in trace (show theirMove ++ " vs " ++ show ourMove ++ " move score: " ++ show moveScore ++ " result is: " ++ show result) result
 
 solve1 :: [Char] -> Int
 solve1 input = do
