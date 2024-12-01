@@ -28,7 +28,7 @@ calculateValue line =
       commonChars = intersect pack1 pack2
       char = head commonChars
       result = charToScore char
-  in trace ("score: " ++ show result) result
+  in result
 
 solve1 :: String -> Int
 solve1 input = do

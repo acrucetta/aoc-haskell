@@ -3,6 +3,7 @@ import Test.Hspec
 import Day01
 import Day02
 import Day03
+import Day04
 
 main :: IO ()
 main = hspec $ do
@@ -21,3 +22,7 @@ main = hspec $ do
     it "solves part 1" $ do
       input <- readFile "test/data/day03.txt"
       Day03.solve1 input `shouldBe` 157
+  describe "Day04" $ do
+    it "solves part 1" $ do
+      input <- readFile "test/data/day04.txt"
+      Day04.solve1 input `shouldBe` 2

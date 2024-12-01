@@ -44,7 +44,7 @@ getRoundOutcome round =
       ourMove = letterToMove $ last round
       moveScore = fromEnum ourMove + 1
       result = calcRound ourMove theirMove + moveScore
-  in trace (show theirMove ++ " vs " ++ show ourMove ++ " move score: " ++ show moveScore ++ " result is: " ++ show result) result
+  in result
 
 solve1 :: [Char] -> Int
 solve1 input = do
