@@ -1,20 +1,12 @@
 module Lib where
 
 import Data.Char (isDigit)
-import Debug.Trace (trace)
-import GHC.IO (unsafePerformIO)
-import System.Environment (lookupEnv)
 import Text.ParserCombinators.ReadP
 
--- Debug Print
+-- Input
 
--- Create a debug printing function that checks for DEBUG environment variable
-debugPrint :: (Show a) => String -> a -> a
-debugPrint label x = unsafePerformIO $ do
-  debugMode <- lookupEnv "DEBUG"
-  case debugMode of
-    Just _ -> return $ trace (label ++ ": " ++ show x) x
-    Nothing -> return x
+strToIntList :: [String] -> [Int]
+strToIntList = map read
 
 -- Parsers
 

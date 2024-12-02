@@ -14,3 +14,7 @@ main = hspec $ do
     it "solves part 2" $ do
       input <- readFile "test/data/day01.txt"
       Day01.solve2 input `shouldBe` 31 
+  describe "Day02" $ do
+    it "solves part 1" $ do
+      input <- readFile "test/data/day02.txt"
+      Day01.solve1 input `shouldBe` 2 

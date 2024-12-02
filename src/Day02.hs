@@ -1,59 +1,58 @@
 {-# LANGUAGE DerivingStrategies #-}
 
 module Day02 where
-
 import Paths_aoc (getDataFileName)
-import Debug.Trace (trace)
 import Prelude hiding (round)
-import Data.Vector.Generic.Mutable (move)
+import Debug.Trace
+import Lib (strToIntList)
 
-data Move = Rock | Paper | Scissors | Undefined
-  deriving (Show, Eq, Enum)
+{-
+Steps:
+- Calculate (-) from left to right in each list
+- Each one check:
+  - If they're all positive or all negative. 
+  - If abs difference is at least one or at most three
+    i.e., filter any number at or above 4 if > 0 fail
+-}
 
-instance Ord Move where
-  compare Rock Rock = EQ
-  compare Paper Paper = EQ
-  compare Scissors Scissors = EQ
-  compare Rock Paper = LT
-  compare Rock Scissors = GT
-  compare Paper Rock = GT
-  compare Paper Scissors = LT
-  compare Scissors Rock = LT
-  compare Scissors Paper = GT
-  compare _ _ = LT
+isReportValid :: [Int] -> Bool
+isReportValid report =
+  let diffs = zipWith (-) (tail report) report
+      increasingOrDecreasing = all (>0) diffs || all (<0) diffs
+      absDiffs = map abs diffs
+      withinThreshold = all (>0) absDiffs && all (<=3) absDiffs
+  in increasingOrDecreasing && withinThreshold
 
-letterToMove :: Char -> Move
-letterToMove char = case char of
-  'A' -> Rock
-  'B' -> Paper
-  'C' -> Scissors
-  'X' -> Rock
-  'Y' -> Paper
-  'Z' -> Scissors
-  _ -> Undefined
-
-calcRound :: Move -> Move -> Int
-calcRound ours theirs = case compare ours theirs of
-  GT -> 6
-  LT -> 0
-  EQ -> 3
-
-getRoundOutcome :: String -> Int
-getRoundOutcome round =
-  let theirMove = letterToMove $ head round
-      ourMove = letterToMove $ last round
-      moveScore = fromEnum ourMove + 1
-      result = calcRound ourMove theirMove + moveScore
-  in result
+isReportValidFlex :: [Int] -> Bool
+isReportValidFlex report =
+  -- We need to check how many are increasing or decreasin
+  -- Then check if by adding 1 to it we meet the length
+  -- If so, then tag it somehow
+  -- Also keep a tally of the values outside the threshold
+  let diffs = zipWith (-) (tail report) report
+      increasingCount = length (filter (>0) diffs)
+      decreasingCount = length (filter (<0) diffs)
+      zerosCount = length $ filter (==0) diffs
+      absDiffs = map abs diffs
+      thresholdCount = length $ filter (\x -> x == 0 || x > 3) absDiffs
+  in trace ("Increasing count: " ++ show increasingCount ++
+            ", Decreasing count: " ++ show decreasingCount ++
+            ", Threshold count: " ++ show thresholdCount)
+     (increasingCount + thresholdCount) <= 1 || (decreasingCount + thresholdCount) <= 1
 
 solve1 :: [Char] -> Int
-solve1 input = do
-  let rounds = lines input
-  sum (map getRoundOutcome rounds)
+solve1 input =
+  let reports = map (strToIntList . words) (lines input)
+      validReports = filter id $ map isReportValid reports
+      totalValid = length validReports
+  in totalValid
 
 solve2 :: [Char] -> Int
-solve2 input = do
-  23
+solve2 input =
+  let reports = map (strToIntList . words) (lines input)
+      validReports = filter id $ map isReportValidFlex reports
+      totalValid = length validReports
+  in totalValid
 
 day02 :: IO ()
 day02 = do
