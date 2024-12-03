@@ -1,58 +1,47 @@
 {-# LANGUAGE DerivingStrategies #-}
 
 module Day02 where
-import Paths_aoc (getDataFileName)
-import Prelude hiding (round)
+
 import Debug.Trace
 import Lib (strToIntList)
+import Paths_aoc (getDataFileName)
+import Prelude hiding (round)
 
 {-
 Steps:
 - Calculate (-) from left to right in each list
 - Each one check:
-  - If they're all positive or all negative. 
+  - If they're all positive or all negative.
   - If abs difference is at least one or at most three
     i.e., filter any number at or above 4 if > 0 fail
 -}
 
-isReportValid :: [Int] -> Bool
-isReportValid report =
+isSafe :: [Int] -> Bool
+isSafe report =
   let diffs = zipWith (-) (tail report) report
-      increasingOrDecreasing = all (>0) diffs || all (<0) diffs
+      increasingOrDecreasing = all (> 0) diffs || all (< 0) diffs
       absDiffs = map abs diffs
-      withinThreshold = all (>0) absDiffs && all (<=3) absDiffs
-  in increasingOrDecreasing && withinThreshold
+      withinThreshold = all (> 0) absDiffs && all (<= 3) absDiffs
+   in increasingOrDecreasing && withinThreshold
 
-isReportValidFlex :: [Int] -> Bool
-isReportValidFlex report =
-  -- We need to check how many are increasing or decreasin
-  -- Then check if by adding 1 to it we meet the length
-  -- If so, then tag it somehow
-  -- Also keep a tally of the values outside the threshold
-  let diffs = zipWith (-) (tail report) report
-      increasingCount = length (filter (>0) diffs)
-      decreasingCount = length (filter (<0) diffs)
-      zerosCount = length $ filter (==0) diffs
-      absDiffs = map abs diffs
-      thresholdCount = length $ filter (\x -> x == 0 || x > 3) absDiffs
-  in trace ("Increasing count: " ++ show increasingCount ++
-            ", Decreasing count: " ++ show decreasingCount ++
-            ", Threshold count: " ++ show thresholdCount)
-     (increasingCount + thresholdCount) <= 1 || (decreasingCount + thresholdCount) <= 1
+anySafe :: [Int] -> Bool
+anySafe report =
+  any (\i -> isSafe (take i report ++ drop (i + 1) report)) [0 .. length report - 1]
 
 solve1 :: [Char] -> Int
 solve1 input =
   let reports = map (strToIntList . words) (lines input)
-      validReports = filter id $ map isReportValid reports
+      validReports = filter id $ map isSafe reports
       totalValid = length validReports
-  in totalValid
+   in totalValid
 
 solve2 :: [Char] -> Int
 solve2 input =
   let reports = map (strToIntList . words) (lines input)
-      validReports = filter id $ map isReportValidFlex reports
+      -- ([any([is_safe(row[:i] + row[i + 1:]) for i in range(len(row))])
+      validReports = filter id $ map anySafe reports
       totalValid = length validReports
-  in totalValid
+   in totalValid
 
 day02 :: IO ()
 day02 = do
