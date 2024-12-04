@@ -29,11 +29,17 @@ getSubsequentPoints :: (Int, Int) -> (Int, Int) -> Int -> [(Int, Int)]
 getSubsequentPoints (row, col) (dr, dc) times =
   [(row + dr * n, col + dc * n) | n <- [0 .. times]]
 
+isValidPoint :: Grid a -> (Int, Int) -> Bool
+isValidPoint grid (row, col) =
+  let (maxRows, maxCols) = gridDimensions grid
+   in row >= 0 && row < maxRows && col >= 0 && col < maxCols
+
 getValsAtSubsequentPoints :: Grid a -> (Int, Int) -> (Int, Int) -> Int -> [a]
-getValsAtSubsequentPoints grid (row, col) (dr, dc) times = do
-  let points = getSubsequentPoints (row, col) (dr, dc) times
-  let vals = map (\(r, c) -> getAt grid (r, c)) points
-  vals
+getValsAtSubsequentPoints grid (row, col) (dr, dc) times =
+  let potentialPoints = getSubsequentPoints (row, col) (dr, dc) times
+      validPoints = filter (isValidPoint grid) potentialPoints
+      vals = map (\(r, c) -> getAt grid (r, c)) validPoints
+   in vals
 
 -- Input
 

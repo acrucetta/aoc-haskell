@@ -1,13 +1,9 @@
 module Day04 where
 
+import Data.Bifunctor
+import Debug.Trace (trace)
 import Lib
 import Paths_aoc (getDataFileName)
-
-toCharList :: [String] -> [[Char]]
-toCharList = id
-
-buildGrid :: [String] -> Grid Char
-buildGrid = toCharList
 
 {-
 Steps:
@@ -20,31 +16,73 @@ Steps:
 
 For each cel, get all the points in each direction
 Then check if any of those points match X,M,A,S including
-  the current cel 
+  the current cel
 -}
 
-isChristmas :: [Char] -> Bool
-isChristmas vals = vals == "XMAS"
+toCharList :: [String] -> [[Char]]
+toCharList = id
+
+buildGrid :: [String] -> Grid Char
+buildGrid = toCharList
+
+isXMAS :: [Char] -> Bool
+isXMAS vals = vals == ['X', 'M', 'A', 'S']
 
 checkCells :: Grid Char -> Int
-checkCells grid = do
-  let maxRow = (-) 1 length grid 
-  let maxCol = (-) 1 length $ head grid
-  let cells = [(row,col)|row<-[0..maxRow],col<-[0..maxCol]]
-  2
-  
+checkCells grid =
+  let maxRow = length grid - 1
+      maxCol = length (head grid) - 1
+      cells = [(row, col) | row <- [0 .. maxRow], col <- [0 .. maxCol]]
+      adjacentLetters cell = filter (\vals -> length vals == 4) $ map (\(dr, dc) -> getValsAtSubsequentPoints grid cell (dr, dc) 3) allDirections
+      allMatches = map adjacentLetters cells
+      matchingCells = sum [length $ filter isXMAS (adjacentLetters cell) | cell <- cells]
+   in trace ("allMatches:\n" ++ show allMatches) matchingCells
 
 solve1 :: [String] -> Int
-solve1 input = do
+solve1 input =
   let grid = buildGrid input
-  23
+      adjacentLetters = checkCells grid
+   in trace (show adjacentLetters) adjacentLetters
+
+{-
+Part 2:
+- Now we will check each A, if the cell is an A, we will check that the values in the diagonal directions match
+  our expected output. They need to be in order. TOP LEFT , CELL , BOTTOM RIGHT and TOP RIGHT, CELL< BOTTOM LEFT.
+- If we can't find these values we skip the cells. After doing this, if we get MAS and MAS we classify it as a WIN.
+-}
+
+-- Cross directions
+crossDirections :: [(Int, Int)]
+crossDirections = [(-1, -1), (0, 0), (1, 1), (-1, 1), (0, 0), (1, -1)]
+
+hasXMAS :: Maybe ([Char], [Char]) -> Bool
+hasXMAS cell = case cell of
+  Just (diag1, diag2) -> all (`elem` diag1) ['M', 'S'] && all (`elem` diag2) ['M', 'S']
+  _ -> False
+
+checkCrossCells :: Grid Char -> Int
+checkCrossCells grid =
+  let maxRow = length grid - 1
+      maxCol = length (head grid) - 1
+      onlyAs = [(row, col) | row <- [0 .. maxRow], col <- [0 .. maxCol], getAt grid (row, col) == 'A']
+      getDiagonalValues (r, c) =
+        let points1 = filter (isValidPoint grid) [bimap (+ r) (+ c) (-1, -1), bimap (+ r) (+ c) (1, 1)]
+            points2 = filter (isValidPoint grid) [bimap (+ r) (+ c) (-1, 1), bimap (+ r) (+ c) (1, -1)]
+            vals1 = map (getAt grid) points1
+            vals2 = map (getAt grid) points2
+         in if length points1 == 2 && length points2 == 2 -- Only if we have all 4 points
+              then Just (vals1, vals2)
+              else Nothing
+      allDiagonals = map getDiagonalValues onlyAs
+      validDiagonals = filter hasXMAS allDiagonals
+   in trace (show validDiagonals) length validDiagonals
 
 solve2 :: [String] -> Int
 solve2 input = do
-  23
+  checkCrossCells input
 
 day04 :: IO ()
 day04 = do
   input <- getDataFileName "day04-input.txt" >>= readFile
-  print $ solve1 input
-  print $ solve2 input
+  -- print $ solve1 (lines input)
+  print $ solve2 (lines input)
