@@ -4,6 +4,7 @@ import Debug.Trace (trace)
 import Lib (strToIntList)
 import Paths_aoc (getDataFileName)
 import Text.Regex.TDFA
+import Data.List
 
 mulRegex :: String
 mulRegex = "mul\\([0-9]{1,3},[0-9]{1,3}\\)"
@@ -49,6 +50,9 @@ calculateRow str = do
   let matches = matchMuls str
   let nums = map (calculateMul . matchNums) matches
   sum nums
+
+isMul :: String -> Bool
+isMul str = "mul(" `isPrefixOf` str
 
 calculateRowWithState :: String -> Int
 calculateRowWithState str = do

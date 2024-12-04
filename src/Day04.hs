@@ -1,55 +1,45 @@
 module Day04 where
 
-import Control.Applicative
-import Control.Monad
-import Debug.Trace
 import Lib
 import Paths_aoc (getDataFileName)
-import Text.ParserCombinators.ReadP
+
+toCharList :: [String] -> [[Char]]
+toCharList = id
+
+buildGrid :: [String] -> Grid Char
+buildGrid = toCharList
 
 {-
-In how many assignment pairs does one range fully contain the other?
-2-4,6-8
-2-3,4-5
-
 Steps:
-1. Parse input into (x1,y1,x2,y2)
-2. Check if one is inside of the other, if so add 1 else 0
+- We have the grid
+- Now we need to iterate over each cel
+  - At each cel, check if its an X
+  - If so, check for matches in all directions
+  - If any of those directions have a succesful match
+  i.e., X,M,A,S then return a 1, else return 0
+
+For each cel, get all the points in each direction
+Then check if any of those points match X,M,A,S including
+  the current cel 
 -}
 
--- Check if either range contains the other
--- e.g., is x1<=x2 and y1>=y2 or x2<=x1 and y2>=y1
-isContained :: (Ord a, Ord b) => (a, b) -> (a, b) -> Bool
-isContained (x1, y1) (x2, y2) =
-  (x1 <= x2 && y1 >= y2) -- 1 contains 2
-    || (x2 <= x1 && y2 >= y1) -- 2 contains 1
+isChristmas :: [Char] -> Bool
+isChristmas vals = vals == "XMAS"
 
-parseRange :: ReadP (Int, Int, Int, Int)
-parseRange = do
-  x1 <- parseNumber
-  void $ char '-'
-  y1 <- parseNumber
-  void $ char ','
-  x2 <- parseNumber
-  void $ char '-'
-  y2 <- parseNumber
-  eof
-  return (x1, y1, x2, y2)
+checkCells :: Grid Char -> Int
+checkCells grid = do
+  let maxRow = (-) 1 length grid 
+  let maxCol = (-) 1 length $ head grid
+  let cells = [(row,col)|row<-[0..maxRow],col<-[0..maxCol]]
+  2
+  
 
-checkRange :: String -> Int
-checkRange line = do
-  case readP_to_S parseRange line of
-    [(result, "")] ->
-      let (x1, y1, x2, y2) = result
-          contained = isContained (x1, y1) (x2, y2)
-       in trace (show ((x1, y1), (x2, y2), contained)) (if contained then 1 else 0)
-    _ -> trace ("Failed to parse: " ++ line) 0
-
-solve1 :: [Char] -> Int
+solve1 :: [String] -> Int
 solve1 input = do
-  sum $ map checkRange $ lines input
+  let grid = buildGrid input
+  23
 
-solve2 :: [Char] -> Int
+solve2 :: [String] -> Int
 solve2 input = do
   23
 
