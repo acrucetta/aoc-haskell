@@ -2,10 +2,13 @@
 
 module Day05 where
 
+import Data.IntSet (IntSet, fromList, isSubsetOf)
 import Data.List.Split (splitOn)
+import Data.Map (valid)
 import Debug.Trace (trace)
 import Paths_aoc (getDataFileName)
-import Data.IntSet (fromList, IntSet)
+import Lib (strToIntList)
+import GHC.Conc (par)
 
 {-
 Steps:
@@ -41,21 +44,35 @@ nextPages page rules =
    in fromList pages
 
 -- Check if based on the current page, the next updates are valid
-validatePage :: Int -> [Int] -> Bool
-validatePage currUpdate restUpdates = 
-  True
+validatePage :: Int -> [Int] -> [(Int, Int)] -> Bool
+validatePage currUpdate restUpdates rules =
+  let validPages = nextPages currUpdate rules
+      remainingPages = fromList restUpdates
+   in remainingPages `isSubsetOf` validPages
 
 -- Check if based on a list of pages, the update is valid
-validateUpdate :: [Int] -> Bool
-validateUpdate updates = True
+validateUpdate :: [Int] -> [(Int, Int)] -> Bool
+validateUpdate [] _ = True
+validateUpdate [x] _ = True
+validateUpdate (x : xs) rules = validatePage x xs rules && validateUpdate xs rules
+
+getMiddle:: [Int] -> Int
+getMiddle lst = lst !! (length lst `div` 2)
+
+getMiddlePages :: [(Bool,[Int])] -> [Int] -> [Int]
+getMiddlePages [] acc = acc
+getMiddlePages [x] acc = if fst x then acc ++ [getMiddle (snd x)] else acc
+getMiddlePages (x:xs) acc = if fst x then getMiddlePages xs (acc ++ [getMiddle (snd x)]) else getMiddlePages xs acc
 
 solve1 :: [Char] -> Int
 solve1 input =
   let parts = splitOn "\n\n" input
-      (rules, updates) = (words $ head parts, words $ last parts)
-      ruleSet = buildRuleset rules
-      samplePages = nextPages 47 ruleSet
-   in trace (show samplePages) 23
+      (rules, updates) = (buildRuleset $ words $ head parts, words $ last parts)
+      parsedUpdates = map (strToIntList . splitOn ",") updates
+      validUpdates = map (\update -> validateUpdate update rules) parsedUpdates
+      updatesWithFlag = zip validUpdates parsedUpdates
+      middlePages = getMiddlePages updatesWithFlag []
+   in trace (show middlePages) sum middlePages
 
 solve2 :: [Char] -> Int
 solve2 input = do
