@@ -1,35 +1,11 @@
 module Day06 where
 
-import Data.Bifunctor
-import Data.List.Split.Internals (build)
+import qualified Data.Set as Set
 import Data.Maybe
 import Debug.Trace (trace)
 import Lib
 import Paths_aoc (getDataFileName)
 import Data.List
-
-{-
-Part 1
-
-Steps:
-- Find location of start node and direction
-  - He will be facing up
-
-- Move the node until we hit a # then turn right (we can create a grid that we keep iterating over)
-  - [...]
-- Keep moving until we hit a boundary, then keep track of all the visited nodes
-- Return the total number of distinct nodes
-
-Approach:
-- Recursion with:
-  - currNode, direction, visitedNodes
-
-- peekNode
-  - if out of bounds, return Nothing or something else
-  - if in-bounds, check if its a "." or "#"
-      - If it's # rotate the direction
-      - If it's a . keep the same direction
--}
 
 -- Function to rotate the direction 90 degrees to the right
 rotateRight :: (Int, Int) -> (Int, Int)
@@ -54,13 +30,43 @@ solve1 input =
       visited = traverseGrid startCoords (-1, 0) grid []
    in trace (show startCoords ++ show visited) (length $ nub visited) + 1
 
-solve2 :: String -> Int
-solve2 input = do
-  23
+type Point = (Int,Int)
+type Direction = (Int,Int)
+type Path = Set.Set (Point, Direction)
+
+-- Traverse the grid in a given direction
+containsLoop :: Point -> Direction -> Grid Char -> Path -> Bool
+containsLoop pos@(x,y) dir@(dx, dy) grid visited
+  | Set.member (pos, dir) visited  = trace "...found loop!" True
+  | otherwise =
+      case getAt grid nextPos of
+        Just '#' -> containsLoop pos (rotateRight dir) grid (Set.insert (pos,dir) visited)
+        Just '.' -> containsLoop nextPos dir grid (Set.insert (pos,dir) visited)
+        Just '^' -> containsLoop nextPos dir grid (Set.insert (pos,dir) visited)
+        Nothing -> False
+        _ -> error "Unknown character"
+  where
+    nextPos = (x + dx, y + dy)
+
+checksForLoop :: Point -> Direction -> Grid Char -> Point -> Bool
+checksForLoop start dir grid testPos = trace("Done checking for loop at:" ++ show testPos) containsLoop start dir (replaceElement grid testPos '#') Set.empty
+
+getValidPoints :: Grid Char -> (Int,Int) -> [(Int,Int)]
+getValidPoints grid start =
+  let (maxRow, maxCol) = gridDimensions grid
+      validNodes = [(r,c)| r<-[0..maxRow-1],c<-[0..maxCol-1], (r,c)/=start, getAt grid (r,c) == Just '.']
+  in validNodes
+
+solve2 :: [String] -> Int
+solve2 input =
+  let grid = buildGrid input
+      start = fromMaybe (-1, -1) $ findCoords '^' grid
+      candidates = getValidPoints grid start
+      loopingPositions = filter (checksForLoop start (0,-1) grid) candidates
+  in trace (show loopingPositions) length loopingPositions
 
 day06 :: IO ()
 day06 = do
   input <- getDataFileName "day06-input.txt" >>= readFile
-  print $ solve1 (lines input)
-
--- print $ solve2 input
+  -- print $ solve1 (lines input)
+  print $ solve2 (lines input)

@@ -1,9 +1,10 @@
 module Lib where
 
 import Data.Char (isDigit)
-import Text.ParserCombinators.ReadP
 import Data.Foldable (find)
 import Data.Maybe
+import Data.Text (replace)
+import Text.ParserCombinators.ReadP
 
 -- Graph parsing
 
@@ -16,7 +17,6 @@ buildGrid = toCharList
 -- Graph operations
 
 type Grid a = [[a]]
-data Point = Point Int Int
 
 -- North, east, south, west
 cardinalDirections :: [(Int, Int)]
@@ -32,10 +32,10 @@ gridDimensions grid = (maxRows, maxCols)
     maxCols = length $ head grid
 
 getAt :: Grid a -> (Int, Int) -> Maybe a
-getAt grid (row, col) = 
-  if isValidPoint grid (row,col)
-  then Just ((grid !! row) !! col)
-  else Nothing
+getAt grid (row, col) =
+  if isValidPoint grid (row, col)
+    then Just ((grid !! row) !! col)
+    else Nothing
 
 getNeighbors :: Grid a -> (Int, Int) -> [(Int, Int)] -> [a]
 getNeighbors grid (row, col) = mapMaybe (\(dr, dc) -> getAt grid (row + dr, col + dc))
@@ -56,16 +56,21 @@ getValsAtSubsequentPoints grid (row, col) (dr, dc) times =
       vals = map (\(r, c) -> getAt grid (r, c)) validPoints
    in catMaybes vals
 
+replaceElement :: Grid a -> (Int, Int) -> a -> Grid a
+replaceElement grid (row, col) value =
+  let oldRow = grid !! row
+      modifiedRow = take col oldRow ++ [value] ++ drop (col + 1) oldRow
+   in take row grid ++ [modifiedRow] ++ drop (row + 1) grid
+
 -- Graph find
 
 -- Finds first ocurrence of element in 2D list
-findCoords :: Eq a => a -> [[a]] -> Maybe (Int, Int)
-findCoords x matrix = 
-  let coords = [(row, col) | (row, xs) <- zip [0..] matrix, (col, val) <- zip [0..] xs, val == x]
-  in case coords of
-       [] -> Nothing
-       (coord:_) -> Just coord
-
+findCoords :: (Eq a) => a -> [[a]] -> Maybe (Int, Int)
+findCoords x matrix =
+  let coords = [(row, col) | (row, xs) <- zip [0 ..] matrix, (col, val) <- zip [0 ..] xs, val == x]
+   in case coords of
+        [] -> Nothing
+        (coord : _) -> Just coord
 
 -- Input
 
