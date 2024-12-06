@@ -4,6 +4,7 @@ import Data.Bifunctor
 import Debug.Trace (trace)
 import Lib
 import Paths_aoc (getDataFileName)
+import Data.Maybe
 
 {-
 Steps:
@@ -18,12 +19,6 @@ For each cel, get all the points in each direction
 Then check if any of those points match X,M,A,S including
   the current cel
 -}
-
-toCharList :: [String] -> [[Char]]
-toCharList = id
-
-buildGrid :: [String] -> Grid Char
-buildGrid = toCharList
 
 isXMAS :: [Char] -> Bool
 isXMAS vals = vals == ['X', 'M', 'A', 'S']
@@ -44,13 +39,6 @@ solve1 input =
       adjacentLetters = checkCells grid
    in trace (show adjacentLetters) adjacentLetters
 
-{-
-Part 2:
-- Now we will check each A, if the cell is an A, we will check that the values in the diagonal directions match
-  our expected output. They need to be in order. TOP LEFT , CELL , BOTTOM RIGHT and TOP RIGHT, CELL< BOTTOM LEFT.
-- If we can't find these values we skip the cells. After doing this, if we get MAS and MAS we classify it as a WIN.
--}
-
 -- Cross directions
 crossDirections :: [(Int, Int)]
 crossDirections = [(-1, -1), (0, 0), (1, 1), (-1, 1), (0, 0), (1, -1)]
@@ -64,12 +52,12 @@ checkCrossCells :: Grid Char -> Int
 checkCrossCells grid =
   let maxRow = length grid - 1
       maxCol = length (head grid) - 1
-      onlyAs = [(row, col) | row <- [0 .. maxRow], col <- [0 .. maxCol], getAt grid (row, col) == 'A']
+      onlyAs = [(row, col) | row <- [0 .. maxRow], col <- [0 .. maxCol], getAt grid (row, col) == Just 'A']
       getDiagonalValues (r, c) =
         let points1 = filter (isValidPoint grid) [bimap (+ r) (+ c) (-1, -1), bimap (+ r) (+ c) (1, 1)]
             points2 = filter (isValidPoint grid) [bimap (+ r) (+ c) (-1, 1), bimap (+ r) (+ c) (1, -1)]
-            vals1 = map (getAt grid) points1
-            vals2 = map (getAt grid) points2
+            vals1 = map (fromMaybe ' ' . getAt grid) points1
+            vals2 = map (fromMaybe ' ' . getAt grid) points2
          in if length points1 == 2 && length points2 == 2 -- Only if we have all 4 points
               then Just (vals1, vals2)
               else Nothing
@@ -84,5 +72,5 @@ solve2 input = do
 day04 :: IO ()
 day04 = do
   input <- getDataFileName "day04-input.txt" >>= readFile
-  -- print $ solve1 (lines input)
+  print $ solve1 (lines input)
   print $ solve2 (lines input)
