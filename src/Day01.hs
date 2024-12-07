@@ -19,7 +19,7 @@ absDiff x y = abs (x - y)
 
 solve1 :: [Char] -> Int
 solve1 input = do
-  let groups = transpose $ map (strToIntList . words) (lines input)
+  let groups = transpose $ map (toIntList . words) (lines input)
   let (g1, g2) = (sort $ head groups, sort $ last groups)
   let totalDistance = sum $ zipWith absDiff g1 g2
   trace (show totalDistance) totalDistance
@@ -42,7 +42,7 @@ similarityScore num xs = trace (show result) result
 
 solve2 :: [Char] -> Int
 solve2 input = do
-  let groups = transpose $ map (strToIntList . words) (lines input)
+  let groups = transpose $ map (toIntList . words) (lines input)
   let (g1, g2) = (head groups, last groups)
   let similarCounts = map (\x -> similarityScore x g2) g1
   let similarityTotal = sum similarCounts

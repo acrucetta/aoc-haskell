@@ -1,7 +1,7 @@
 module Day03 where
 
 import Debug.Trace (trace)
-import Lib (strToIntList)
+import Lib (toIntList)
 import Paths_aoc (getDataFileName)
 import Text.Regex.TDFA
 import Data.List
@@ -41,7 +41,7 @@ processOps ops = go ops True []
 
 calculateMul :: [String] -> Int
 calculateMul nums = do
-  let intList = strToIntList nums
+  let intList = toIntList nums
   let mulResult = head intList * last intList
   mulResult
 

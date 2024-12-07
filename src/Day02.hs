@@ -3,7 +3,7 @@
 module Day02 where
 
 import Debug.Trace
-import Lib (strToIntList)
+import Lib (toIntList)
 import Paths_aoc (getDataFileName)
 import Prelude hiding (round)
 
@@ -30,14 +30,14 @@ anySafe report =
 
 solve1 :: [Char] -> Int
 solve1 input =
-  let reports = map (strToIntList . words) (lines input)
+  let reports = map (toIntList . words) (lines input)
       validReports = filter id $ map isSafe reports
       totalValid = length validReports
    in totalValid
 
 solve2 :: [Char] -> Int
 solve2 input =
-  let reports = map (strToIntList . words) (lines input)
+  let reports = map (toIntList . words) (lines input)
       -- ([any([is_safe(row[:i] + row[i + 1:]) for i in range(len(row))])
       validReports = filter id $ map anySafe reports
       totalValid = length validReports

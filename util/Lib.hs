@@ -74,8 +74,8 @@ findCoords x matrix =
 
 -- Input
 
-strToIntList :: [String] -> [Int]
-strToIntList = map read
+toIntList :: [String] -> [Int]
+toIntList = map read
 
 -- Parsers
 

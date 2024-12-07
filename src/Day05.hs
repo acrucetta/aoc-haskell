@@ -6,7 +6,7 @@ import Data.IntSet (IntSet, fromList, isSubsetOf)
 import Data.List.Split (splitOn)
 import Debug.Trace (trace)
 import Paths_aoc (getDataFileName)
-import Lib (strToIntList)
+import Lib (toIntList)
 import Data.Graph (buildG, topSort)
 
 toTuple :: [String] -> (Int, Int)
@@ -47,7 +47,7 @@ solve1 :: [Char] -> Int
 solve1 input =
   let parts = splitOn "\n\n" input
       (rules, updates) = (buildRuleset $ words $ head parts, words $ last parts)
-      parsedUpdates = map (strToIntList . splitOn ",") updates
+      parsedUpdates = map (toIntList . splitOn ",") updates
       flagList = map (\update -> isUpdateValid update rules) parsedUpdates
       updatesWithFlag = zip flagList parsedUpdates
       validUpdates = map snd $ filter fst updatesWithFlag
@@ -76,7 +76,7 @@ solve2 :: [Char] -> Int
 solve2 input = do
   let parts = splitOn "\n\n" input
       (rules, updates) = (buildRuleset $ words $ head parts, words $ last parts)
-      parsedUpdates = map (strToIntList . splitOn ",") updates
+      parsedUpdates = map (toIntList . splitOn ",") updates
       flagList = map (`isUpdateValid` rules) parsedUpdates
       updatesWithFlag = zip flagList parsedUpdates
       invalidUpdates = map snd $ filter (not . fst) updatesWithFlag
