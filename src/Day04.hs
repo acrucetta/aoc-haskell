@@ -54,8 +54,8 @@ checkCrossCells grid =
       maxCol = length (head grid) - 1
       onlyAs = [(row, col) | row <- [0 .. maxRow], col <- [0 .. maxCol], getAt grid (row, col) == Just 'A']
       getDiagonalValues (r, c) =
-        let points1 = filter (isValidPoint grid) [bimap (+ r) (+ c) (-1, -1), bimap (+ r) (+ c) (1, 1)]
-            points2 = filter (isValidPoint grid) [bimap (+ r) (+ c) (-1, 1), bimap (+ r) (+ c) (1, -1)]
+        let points1 = filter (isPointWithinBounds grid) [bimap (+ r) (+ c) (-1, -1), bimap (+ r) (+ c) (1, 1)]
+            points2 = filter (isPointWithinBounds grid) [bimap (+ r) (+ c) (-1, 1), bimap (+ r) (+ c) (1, -1)]
             vals1 = map (fromMaybe ' ' . getAt grid) points1
             vals2 = map (fromMaybe ' ' . getAt grid) points2
          in if length points1 == 2 && length points2 == 2 -- Only if we have all 4 points

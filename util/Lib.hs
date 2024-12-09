@@ -1,10 +1,15 @@
 module Lib where
 
 import Data.Char (isDigit)
-import Data.Foldable (find)
 import Data.Maybe
-import Data.Text (replace)
 import Text.ParserCombinators.ReadP
+
+-- Subsets
+
+subsets :: [a] -> Int -> [[a]]
+subsets _ 0 = [[]]
+subsets [] _ = []
+subsets (x:a) k = map (x:) (subsets a (k-1)) ++ subsets a k
 
 -- Graph parsing
 
@@ -31,9 +36,16 @@ gridDimensions grid = (maxRows, maxCols)
     maxRows = length grid
     maxCols = length $ head grid
 
+-- Return list of values with their points e.g., [(a,(Int,Int))]
+
+toGridValues :: Grid a -> [(a, (Int, Int))]
+toGridValues grid = [(val, (row, col)) | (row, rowVals) <- zip [0 ..] grid, (col, val) <- zip [0 ..] rowVals]
+
+-- Graph getters
+
 getAt :: Grid a -> (Int, Int) -> Maybe a
 getAt grid (row, col) =
-  if isValidPoint grid (row, col)
+  if isPointWithinBounds grid (row, col)
     then Just ((grid !! row) !! col)
     else Nothing
 
@@ -44,17 +56,19 @@ getSubsequentPoints :: (Int, Int) -> (Int, Int) -> Int -> [(Int, Int)]
 getSubsequentPoints (row, col) (dr, dc) times =
   [(row + dr * n, col + dc * n) | n <- [0 .. times]]
 
-isValidPoint :: Grid a -> (Int, Int) -> Bool
-isValidPoint grid (row, col) =
+isPointWithinBounds :: Grid a -> (Int, Int) -> Bool
+isPointWithinBounds grid (row, col) =
   let (maxRows, maxCols) = gridDimensions grid
    in row >= 0 && row < maxRows && col >= 0 && col < maxCols
 
 getValsAtSubsequentPoints :: Grid a -> (Int, Int) -> (Int, Int) -> Int -> [a]
 getValsAtSubsequentPoints grid (row, col) (dr, dc) times =
   let potentialPoints = getSubsequentPoints (row, col) (dr, dc) times
-      validPoints = filter (isValidPoint grid) potentialPoints
+      validPoints = filter (isPointWithinBounds grid) potentialPoints
       vals = map (\(r, c) -> getAt grid (r, c)) validPoints
    in catMaybes vals
+
+-- Graph replace
 
 replaceElement :: Grid a -> (Int, Int) -> a -> Grid a
 replaceElement grid (row, col) value =
@@ -71,6 +85,14 @@ findCoords x matrix =
    in case coords of
         [] -> Nothing
         (coord : _) -> Just coord
+
+-- Points
+
+type Point = (Int, Int)
+
+subtractPoints :: Point -> Point -> Point
+subtractPoints (x1, y1) (x2, y2) =
+  (x2 - x1,y2 - y1)
 
 -- Input
 

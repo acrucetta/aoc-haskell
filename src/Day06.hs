@@ -3,7 +3,7 @@ module Day06 where
 import qualified Data.Set as Set
 import Data.Maybe
 import Debug.Trace (trace)
-import Lib
+import Lib hiding (Point)
 import Paths_aoc (getDataFileName)
 import Data.List
 
