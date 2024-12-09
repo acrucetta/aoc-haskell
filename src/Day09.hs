@@ -1,6 +1,8 @@
 module Day09 where
 
+import Data.Char (intToDigit)
 import Data.Map
+import Data.Text.Internal.Read (digitToInt)
 import Debug.Trace (trace)
 import Paths_aoc (getDataFileName)
 
@@ -40,36 +42,45 @@ toTuples :: [Char] -> [(Int, Char, Char)]
 toTuples input = go input [] 0
   where
     go [] acc _ = reverse acc
+    go [x] acc id = go [] ((id, x, '0') : acc) (id + 1)
     go (x : y : xs) acc id = go xs ((id, x, y) : acc) (id + 1)
-    go _ acc id = reverse acc
 
--- Insert (id,size,empty) into map
 -- We want to create a list out of these that has
 -- (pos,id*size) and (pos...,'.' * empty)
 -- e.g., if we have "(0,1,2)" we get [(0,'0'),(1,'.'),(2,'.') because
 -- of pos = 0 and file id = 0
 -- Note: We will need to pass to this function the latest position
+blockToList :: (Int, Char, Char) -> Int -> [(Int, Char)]
+blockToList (id, size, empties) pos =
+  let intSize = digitToInt size
+      intEmpties = digitToInt empties
+      occupied = [(n, intToDigit id) | n <- [pos .. (pos + intSize)]]
+      free = [(n, '.') | n <- [(pos + intSize) .. (pos + intSize + intEmpties)]]
+   in occupied ++ free
 
--- build a map with: Int : Char with key: position, value: Either File ID or '.'
 buildMap :: [(Int, Char, Char)] -> Map Int Char
-buildMap tuples = go tuples Map.empty
+buildMap tuples = go tuples empty 0
   where
-    go [] map = map
-    go [(id, size, empty) : rest] map = map
-    go _ map = map
+    go [] acc _ = acc
+    go ((id, size, empty) : rest) acc pos = go rest (fromList (blockToList (id, size, empty) pos) `union` acc) (pos + digitToInt size + digitToInt empty)
 
--- Create a list of [(0..111... etc...)]
--- Then convert it to a map with (pos,file_id)
-expandDisk :: [Char] -> [(Int, Char, Char)]
-expandDisk input =
-  let pairs = toTuples input
-   in trace (show pairs) pairs
+-- Logic:
+-- Iterate over the map in reverse order and find empty spots,
+-- once we find an empty spot, append to it and move to the next
+-- value in the map.
+-- fillEmptyBlocks :: Map Int Char -> Map Int Char
+-- fillEmptyBlocks blockMap = go blockMap []
+--     where
+--         go blockMap [] = blockMap
+--         go ...
 
 solve1 :: [Char] -> Int
 solve1 input =
-  let expandedDisk = expandDisk input
+  let tuples = toTuples input
+      blockMap = buildMap tuples
+      occupiedBlocks = reverse (Prelude.filter (\(_, v) -> v /= '.') (toList blockMap))
    in -- let diskMap = buildMap input
-      trace (show expandedDisk) 23
+      trace (show tuples ++ "\n" ++ show blockMap ++ "\n" ++ show occupiedBlocks) 23
 
 solve2 :: [Char] -> Int
 solve2 input =
